@@ -16,6 +16,14 @@ public class Macros {
             for (Meal.MealItem item : meal.getItems()) {
                 Food food = item.getFood();
                 double amount = item.getAmount();
+                String unit = item.getUnit();
+                double servingSize = food.getServingSize();
+                String servingUnit = food.getServingUnit();
+
+                double convertAmount = unitConversions.convert(amount, unit, servingUnit);
+
+                double multiplier = convertAmount / servingSize;
+
                 totalFat += food.getFat() * amount;
                 totalCarbs += food.getCarbs() * amount;
                 totalProtein += food.getProtein() * amount;

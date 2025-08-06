@@ -25,52 +25,63 @@ public class unitConversions {
         return validUnits.contains(unit.toLowerCase());
     }
 
-    // Conversion methods for common units
-    public static double gramsToOunces(double grams) {
-        return grams / 28.35;
-    }
+    // Conversion logic, can add more as necessary
+    public static double convert(double amount, String fromUnit, String toUnit) {
+        fromUnit = fromUnit.toLowerCase();
+        toUnit = toUnit.toLowerCase();
 
-    public static double ouncesToGrams(double ounces) {
-        return ounces * 28.35;
-    }
+        if (fromUnit.equals(toUnit)) {
+            return amount;
+        }
+        
+        if (fromUnit.equals("g") && toUnit.equals("oz")) {
+            return amount / 28.35;
+        }
 
-    public static double cupsToFluidOunces(double cups) {
-        return cups * 8;
-    }
+        if (fromUnit.equals("oz") && toUnit.equals("g")) {
+            return amount * 28.35;
+        }
 
-    public static double fluidOuncesToCups(double fluidOunces) {
-        return fluidOunces / 8;
-    }
+        if (fromUnit.equals("cup") && toUnit.equals("floz")) {
+            return amount * 8;
+        }
 
-    public static double ouncesToPounds(double ounces) {
-        return ounces / 16;
-    }
+        if (fromUnit.equals("floz") && toUnit.equals("cup")) {
+            return amount / 8;
+        }
 
-    public static double poundsToOunces(double pounds) {
-        return pounds * 16;
-    }
-    
-    public static double millilitersToLiters(double milliliters) {
-        return milliliters / 1000;
-    }
+        if (fromUnit.equals("oz") && toUnit.equals("lb")) {
+            return amount / 16;
+        }
 
-    public static double litersToMilliliters(double liters) {
-        return liters * 1000;
-    }
+        if (fromUnit.equals("lb") && toUnit.equals("oz")) {
+            return amount * 16;
+        }
 
-    public static double teaspoonsToTablespoons(double teaspoons) {
-        return teaspoons / 3;
-    }
+        if (fromUnit.equals("ml") && toUnit.equals("l")) {
+            return amount / 1000;
+        }
 
-    public static double tablespoonsToTeaspoons(double tablespoons) {
-        return tablespoons * 3;
-    }
+        if (fromUnit.equals("l") && toUnit.equals("ml")) {
+            return amount * 1000;
+        }
 
-    public static double poundsToGrams(double pounds) {
-        return pounds * 453.592;
-    }
+        if (fromUnit.equals("tsp") && toUnit.equals("tbsp")) {
+            return amount / 3;
+        }
 
-    public static double gramsToPounds(double grams) {
-        return grams / 453.592;
+        if (fromUnit.equals("tbsp") && toUnit.equals("tsp")) {
+            return amount * 3;
+        }
+
+        if (fromUnit.equals("g") && toUnit.equals("lb")) {
+            return amount / 453.592;
+        }
+
+        if (fromUnit.equals("lb") && toUnit.equals("g")) {
+            return amount * 453.592;
+        }
+
+        throw new UnsupportedOperationException("Conversion from " + fromUnit + " to " + toUnit + " is not supported.");
     }
 }

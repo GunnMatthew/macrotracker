@@ -8,10 +8,12 @@ public class Meal {
     public static class MealItem {
         private Food food;
         private double amount;
+        private String unit;
 
-        public MealItem(Food food, double amount) {
+        public MealItem(Food food, double amount, String unit) {
             this.food = food;
             this.amount = amount;
+            this.unit = unit;
         }
 
         public Food getFood() {
@@ -20,6 +22,10 @@ public class Meal {
 
         public double getAmount() {
             return amount;
+        }
+
+        public String getUnit() {
+            return unit;
         }
     }
 
@@ -39,8 +45,8 @@ public class Meal {
             return items;
         }
 
-        public void addItem(Food food, double amount) {
-            items.add(new MealItem(food, amount));
+        public void addItem(Food food, double amount, String unit) {
+            items.add(new MealItem(food, amount, unit));
         }
     }
 }
