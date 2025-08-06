@@ -3,7 +3,7 @@ Creating a macro tracker for personal use as I currently have a very tedious met
 Things still in progress:
 
 - [ ] Daily intake tracking
-- [ ] Remove foods (mistakes happen)
+- [X] Remove foods (mistakes happen)
 - [ ] User consumption input/automatic unit conversion for easy macro tracking
 - [ ] UI (Not planned until logic is completed)
 - [ ] More that would make something like this useful for me
