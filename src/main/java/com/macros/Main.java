@@ -42,6 +42,7 @@ public class Main {
             case "0" -> {
                 saveToFile();
                 System.out.println("Exiting...");
+                System.exit(0);
             }
             default -> System.out.println("Invalid Option");
         }
@@ -50,6 +51,13 @@ public class Main {
     private static void addFood() {
         System.out.println("Enter the food name: ");
         String foodName = scanner.nextLine();
+
+        for (Food food : foodList) {
+            if (food.getName().equalsIgnoreCase(foodName)) {
+                System.out.println(String.format("%s already exists in the list.", foodName));
+                return;
+            }
+        }
 
         double servingSize = 0;
 
