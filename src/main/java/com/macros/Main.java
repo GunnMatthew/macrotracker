@@ -27,10 +27,15 @@ public class Main {
     }
 
     private static void optionMenu() {
+        Macros macros = new Macros();
+
         System.out.println("\nMacro Tracker\n");
         System.out.println("1. Add food\n");
         System.out.println("2. List foods\n");
         System.out.println("3. Remove food\n");
+        System.out.println("4: Edit existing food (not implemented yet)\n");
+        System.out.println("5: Add meal (not implemented yet)\n");
+        System.out.printf("Daily Count - Fat: %sg | Carbs: %sg | Protein: %sg |%n\n", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
         System.out.println("0. Save and quit");
     }
 
@@ -96,7 +101,7 @@ public class Main {
 
         Food food = new Food(foodName, servingSize, servingUnit, fat, carbs, protein);
         foodList.add(food);
-        System.out.println("\nFood added to list.");
+        System.out.println(foodName + " added to the list");
     }
 
     private static void removeFood() {
