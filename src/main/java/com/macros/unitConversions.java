@@ -24,6 +24,7 @@ public class unitConversions {
     public static boolean isValidUnit(String unit) {
         return validUnits.contains(unit.toLowerCase());
     }
+
     // Conversion methods for common units
     public static double gramsToOunces(double grams) {
         return grams / 28.35;
@@ -40,5 +41,36 @@ public class unitConversions {
     public static double fluidOuncesToCups(double fluidOunces) {
         return fluidOunces / 8;
     }
+
+    public static double ouncesToPounds(double ounces) {
+        return ounces / 16;
+    }
+
+    public static double poundsToOunces(double pounds) {
+        return pounds * 16;
+    }
     
+    public static double millilitersToLiters(double milliliters) {
+        return milliliters / 1000;
+    }
+
+    public static double litersToMilliliters(double liters) {
+        return liters * 1000;
+    }
+
+    public static double teaspoonsToTablespoons(double teaspoons) {
+        return teaspoons / 3;
+    }
+
+    public static double tablespoonsToTeaspoons(double tablespoons) {
+        return tablespoons * 3;
+    }
+
+    public static double poundsToGrams(double pounds) {
+        return pounds * 453.592;
+    }
+
+    public static double gramsToPounds(double grams) {
+        return grams / 453.592;
+    }
 }

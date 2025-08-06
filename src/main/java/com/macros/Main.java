@@ -22,22 +22,7 @@ public class Main {
         while (true) { 
             optionMenu();
             String choice = scanner.nextLine();
-
-            switch(choice) {
-                case "1":
-                    addFood();
-                    break;
-                case "2":
-                    listFood();
-                    break;
-                case "0":
-                    saveToFile();
-                    System.out.println("Exiting...");
-                    return;
-                default:
-                    System.out.println("Invalid Option");
-
-            }
+            appLoop(choice);
         }
     }
 
@@ -45,23 +30,50 @@ public class Main {
         System.out.println("\nMacro Tracker\n");
         System.out.println("1. Add food\n");
         System.out.println("2. List foods\n");
+        System.out.println("3. Remove food\n");
         System.out.println("0. Save and quit");
+    }
+
+    public static void appLoop(String choice) {
+        switch (choice) {
+            case "1" -> addFood();
+            case "2" -> listFood();
+            case "3" -> removeFood();
+            case "0" -> {
+                saveToFile();
+                System.out.println("Exiting...");
+            }
+            default -> System.out.println("Invalid Option");
+        }
     }
 
     private static void addFood() {
         System.out.println("Enter the food name: ");
         String foodName = scanner.nextLine();
 
-        System.out.println("\nEnter Serving Size (Just a number, no units): ");
-        double servingSize = Double.parseDouble(scanner.nextLine());
+        double servingSize = 0;
 
-        System.out.println("Enter the unit of measurement for serving size (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz, unit): ");
-        String servingUnit = scanner.nextLine().toLowerCase();
         while (true) {
+            System.out.println("\nEnter Serving Size (Just a number, no units): ");
+            String input = scanner.nextLine();
+        try {
+            servingSize = Double.parseDouble(input);
+            break;
+        } catch (NumberFormatException e) {
+            System.out.println("\nInvalid number. Please enter a numeric value.");
+        }
+        }
+
+        String servingUnit;
+        while (true) {
+            System.out.println("Enter the unit of measurement for serving size (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz, unit): ");
+            servingUnit = scanner.nextLine().toLowerCase();
+
             if (unitConversions.isValidUnit(servingUnit)) {
                 break;
             } else {
-                System.out.println("Invalid unit.  Please enter a valid unit (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz): ");
+                System.out.println("Invalid unit. Please enter a valid unit (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz): ");
+                return;
             }
         }
         
@@ -77,6 +89,30 @@ public class Main {
         Food food = new Food(foodName, servingSize, servingUnit, fat, carbs, protein);
         foodList.add(food);
         System.out.println("\nFood added to list.");
+    }
+
+    private static void removeFood() {
+        
+        if (foodList.isEmpty()) {
+            System.out.println("\nThere is nothing to remove!");
+            return;
+        }
+
+        System.out.println("Enter the name of the food to remove: ");
+        String foodName = scanner.nextLine();
+
+        boolean isRemoved = false;
+        for (int i = 0; i < foodList.size(); i++) {
+          if (foodList.get(i).getName().equalsIgnoreCase(foodName)) { 
+            foodList.remove(i);
+            isRemoved = true;
+            System.out.println(String.format("\n%s removed from list.", foodName));
+            break;
+          }
+        }
+        if (!isRemoved) {
+            System.out.println(String.format("\n%s not found in the list.", foodName));
+        }
     }
 
     private static void saveToFile() {
