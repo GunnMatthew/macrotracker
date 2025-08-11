@@ -1,6 +1,11 @@
 package com.macros;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class DBManager {
@@ -11,7 +16,8 @@ public class DBManager {
     }
 
     public void createTable() throws SQLException {
-        String sql = """
+        //Table for foods
+        String foods = """
                 CREATE TABLE IF NOT EXISTS foods (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT UNIQUE,
@@ -23,8 +29,19 @@ public class DBManager {
                 );
                 """;
 
+        //Table to track foods consumed
+        String consumedFoods = """
+            CREATE TABLE IF NOT EXISTS consumedFoods (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT,
+                amount REAL,
+                unit TEXT
+            );
+            """;
+
         try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
+            statement.execute(foods);
+            statement.execute(consumedFoods);
         }
     }
 
@@ -56,16 +73,35 @@ public class DBManager {
         }
     }
 
+    //Add consumed foods for tracking macros
+    public void addConsumedFood(String foodName, double amount, String unit) throws SQLException {
+        String sql = "INSERT INTO consumedFoods (name, amount, unit) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, foodName);
+            pstmt.setDouble(2, amount);
+            pstmt.setString(3, unit);
+            pstmt.executeUpdate();
+        }
+    }
+
+    //Manual resetting of consumed foods ***Replace later with automatic process at midnight
+    public void resetConsumedFoods() throws SQLException {
+        String sql = "DELETE FROM consumedFoods";
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql);
+        }
+    }
+
     public ArrayList<Food> getAllFoods() throws SQLException {
         ArrayList<Food> foods = new ArrayList<>();
-        String sql = "SELECT name, serving_size, serving_unit, fat, carbs, protein FROM foods";
+        String sql = "SELECT name, servingSize, servingUnit, fat, carbs, protein FROM foods";
         
         try (Statement statement = connection.createStatement();
              ResultSet rs = statement.executeQuery(sql)) {
             while (rs.next()) {
                 String name = rs.getString("name");
-                double servingSize = rs.getDouble("serving_size");
-                String servingUnit = rs.getString("serving_unit");
+                double servingSize = rs.getDouble("servingSize");
+                String servingUnit = rs.getString("servingUnit");
                 double fat = rs.getDouble("fat");
                 double carbs = rs.getDouble("carbs");
                 double protein = rs.getDouble("protein");
@@ -73,6 +109,23 @@ public class DBManager {
             }
         }
         return foods;
+    }
+
+    public ArrayList<Object[]> getAllConsumedFoods() throws SQLException {
+        ArrayList<Object[]> consumedFoods = new ArrayList<>();
+        String sql = "SELECT name, amount, unit FROM consumedFoods";
+        
+        try (Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(sql)) {
+            while (rs.next()) {
+                consumedFoods.add(new Object[] {
+                    rs.getString("name"),
+                    rs.getDouble("amount"),
+                    rs.getString("unit")
+                });
+            }
+        }
+        return consumedFoods;
     }
 
 }

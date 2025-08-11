@@ -8,13 +8,14 @@ public class Main {
     private static DBManager dbManager;
     private static ArrayList<Food> foodList = new ArrayList<>();
     private static Scanner scanner = new Scanner(System.in);
-    private static ArrayList<Meal.TotalMeal> mealList = new ArrayList<>();
+    private static ArrayList<Meal.TotalMeal> dailyMeals = new ArrayList<>();
 
     public static void main(String[] args) {
         // Load food and meals json file if it exists
         try {
             dbManager = new DBManager("macrotracker.db");
             dbManager.createTable();
+            loadDailyMealsFromDB();
         } catch (SQLException e) {
             System.out.println("Database Error: " + e.getMessage());
             return;
@@ -29,19 +30,20 @@ public class Main {
 
     private static void optionMenu() {
         Macros macros = new Macros();
+        macros.mealTotals(dailyMeals);
 
         System.out.println("\nMacro Tracker\n");
         System.out.println("1: Add food\n");
         System.out.println("2: List foods\n");
         System.out.println("3: Remove food\n");
         System.out.println("4: Edit existing food (not implemented yet)\n");
-        System.out.println("5: Add meal (not implemented yet)\n");
-        System.out.println("6: List meals\n");
+        System.out.println("5: Add consumed food\n");
+        System.out.println("6: Reset daily macro tracker\n");
         System.out.println("7: Remove meal (not implemented yet)\n");
         System.out.println("8: Add to daily consumption (not implemented yet)\n");
         System.out.println("9: Reset daily consumption (not implemented yet)\n");
         System.out.printf("Daily Count - Fat: %sg | Carbs: %sg | Protein: %sg |%n\n", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
-        System.out.println("0: Save and quit");
+        System.out.println("0: Quit");
     }
 
     public static void appLoop(String choice) {
@@ -49,8 +51,8 @@ public class Main {
             case "1" -> addFood();
             case "2" -> listFood();
             case "3" -> removeFood();
-            // case "5" -> addMeal();
-            // case "6" -> listMeals();
+            case "5" -> addToDailyConsumption();
+            case "6" -> resetConsumedFood();
             case "0" -> {
                 System.out.println("Exiting...");
                 System.exit(0);
@@ -134,19 +136,112 @@ public class Main {
 
     // Lists all food items in the food list
     public static void listFood() {
-        if (foodList.isEmpty()) {
-            System.out.println("\nFood list is currently empty. Try adding food.");
+        try {
+            ArrayList<Food> foods = dbManager.getAllFoods();
+            if (foods.isEmpty()) {
+                System.out.println("\nFood list is currently empty. Try adding food.");
+                return;
+            }
+
+            System.out.println("\n--------------------------------------");
+            for (Food food : foods) {
+                System.out.println(food);
+            }
+            System.out.println("--------------------------------------");
+        } catch (SQLException e) {
+            System.out.println("Database Error: " + e.getMessage());
+        }
+    }
+
+    //Add consumed foods to calculate total macros
+    private static void addToDailyConsumption() {
+        System.out.println("Enter name of consumed food: ");
+        String foodName = scanner.nextLine();
+
+        Food food = null;
+
+        try {
+            ArrayList<Food> foods = dbManager.getAllFoods();
+            for (Food f : foods) {
+                if (f.getName().equalsIgnoreCase(foodName)) {
+                    food = f;
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Database Error: " + e.getMessage());
             return;
         }
 
-        System.out.println("\n--------------------------------------");
-        for (Food food : foodList) {
-            System.out.println(food);
+        if (food == null) {
+            System.out.println("Food not found.");
+            return;
         }
-        System.out.println("--------------------------------------");
+
+        System.out.println("Enter amount eaten (just # value, unit will be next): ");
+        double amount = Double.parseDouble(scanner.nextLine());
+
+        System.out.println("Enter unit (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz, unit): ");
+        String unit = scanner.nextLine();
+
+        try {
+            dbManager.addConsumedFood(food.getName(), amount, unit);
+        } catch (SQLException e) {
+            System.out.println("Database Error: " + e.getMessage());
+        }
+
+        Meal.TotalMeal meal = new Meal.TotalMeal("Single Food: " + food.getName());
+        meal.addItem(food, amount, unit);
+        dailyMeals.add(meal);
+
+        System.out.println(food.getName() + " added to daily consumption.");
+    }
+    
+    //Fetch consumed foods from database
+    private static void loadDailyMealsFromDB() {
+        try {
+            ArrayList<Object[]> consumed = dbManager.getAllConsumedFoods();
+            for (Object[] entry : consumed) {
+                String foodName = (String) entry[0];
+                double amount = (Double) entry[1];
+                String unit = (String) entry[2];
+
+                Food food = null;
+
+                ArrayList<Food> foods = dbManager.getAllFoods();
+                for (Food f : foods) {
+                    if (f.getName().equalsIgnoreCase(foodName)) {
+                        food = f;
+                        break;
+                    }
+                }
+
+                if (food != null) {
+                    Meal.TotalMeal meal = new Meal.TotalMeal("Single food: " + food.getName());
+                    meal.addItem(food, amount, unit);
+                    dailyMeals.add(meal);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Database Error: " + e.getMessage());
+        }
     }
 
+    //Method to handle exception for dbManager.resetConsumedFoods
+    private static void resetConsumedFood() {
+        try {
+                dbManager.resetConsumedFoods();
+                dailyMeals.clear();
+                System.out.println("Daily macros have been reset.");
+            } catch (SQLException e) {
+                System.out.println("Database Error: " + e.getMessage());
+            }
+    }
+
+
+
     // Adds a meal to the meal list
+
     // public static void addMeal() {
     //     System.out.println("Enter a meal name: ");
     //     String mealName = scanner.nextLine();
@@ -186,6 +281,7 @@ public class Main {
     // }
 
     // Lists all meals in the meal list
+
     // public static void listMeals() {
     //     if (mealList.isEmpty()) {
     //         System.out.println("\nMeal list is currently empty. Try adding meals.");
