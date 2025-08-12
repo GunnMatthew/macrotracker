@@ -24,9 +24,9 @@ public class Macros {
 
                 double multiplier = convertAmount / servingSize;
 
-                totalFat += food.getFat() * amount;
-                totalCarbs += food.getCarbs() * amount;
-                totalProtein += food.getProtein() * amount;
+                totalFat += food.getFat() * multiplier;
+                totalCarbs += food.getCarbs() * multiplier;
+                totalProtein += food.getProtein() * multiplier;
             }
         }
     }

@@ -82,6 +82,14 @@ public class UnitConversions {
             return amount * 453.592;
         }
 
+        if (fromUnit.equals("tbsp") && toUnit.equals("cup")) {
+            return amount / 16;
+        }
+
+        if (fromUnit.equals("cup") && toUnit.equals("tbsp")) {
+            return amount * 16;
+        }
+
         throw new UnsupportedOperationException("Conversion from " + fromUnit + " to " + toUnit + " is not supported.");
     }
 }

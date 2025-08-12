@@ -67,7 +67,7 @@ public class Main {
         String foodName = scanner.nextLine();
 
         System.out.println("Enter serving size:");
-        double servingSize = Double.parseDouble(scanner.nextLine());
+        double servingSize = parseAmount(scanner.nextLine());
 
         String servingUnit;
         while (true) {
@@ -81,13 +81,13 @@ public class Main {
         }
 
         System.out.println("Enter Fat (g):");
-        double fat = Double.parseDouble(scanner.nextLine());
+        double fat = parseAmount(scanner.nextLine());
 
         System.out.println("Enter Carbohydrates (g):");
-        double carbs = Double.parseDouble(scanner.nextLine());
+        double carbs = parseAmount(scanner.nextLine());
 
         System.out.println("Enter Protein (g):");
-        double protein = Double.parseDouble(scanner.nextLine());
+        double protein = parseAmount(scanner.nextLine());
 
         Food food = new Food(foodName, servingSize, servingUnit, fat, carbs, protein);
 
@@ -179,7 +179,7 @@ public class Main {
         }
 
         System.out.println("Enter amount eaten (just # value, unit will be next): ");
-        double amount = Double.parseDouble(scanner.nextLine());
+        double amount = parseAmount(scanner.nextLine());
 
         System.out.println("Enter unit (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz, unit): ");
         String unit = scanner.nextLine();
@@ -236,6 +236,31 @@ public class Main {
             } catch (SQLException e) {
                 System.out.println("Database Error: " + e.getMessage());
             }
+    }
+
+    //Allows the use of fractions in user input.  QOL
+    private static double parseAmount(String input) {
+        input = input.trim();
+
+        if (input.contains("/")) {
+            String[] parts = input.split("/");
+            if (parts.length == 2) {
+                try {
+                    double numerator = Double.parseDouble(parts[0].trim());
+                    double denominator = Double.parseDouble(parts[1].trim());
+                    return numerator / denominator;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid fraction format. Please enter a valid number.");
+                    return 0;
+                }
+            }
+        }
+        try {
+            return Double.parseDouble(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid number format. Please enter a valid number.");
+            return 0;
+        }
     }
 
 
