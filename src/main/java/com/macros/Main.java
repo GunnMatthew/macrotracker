@@ -23,41 +23,89 @@ public class Main {
 
         while (true) { 
             optionMenu();
-            String choice = scanner.nextLine();
-            appLoop(choice);
         }
     }
 
+    //Main Menu
     private static void optionMenu() {
         Macros macros = new Macros();
         macros.mealTotals(dailyMeals);
 
         System.out.println("\nMacro Tracker\n");
-        System.out.println("1: Add food\n");
-        System.out.println("2: List foods\n");
-        System.out.println("3: Remove food\n");
-        System.out.println("4: Edit existing food (not implemented yet)\n");
-        System.out.println("5: Add consumed food\n");
-        System.out.println("6: Reset daily macro tracker\n");
-        System.out.println("7: Remove meal (not implemented yet)\n");
-        System.out.println("8: Add to daily consumption (not implemented yet)\n");
-        System.out.println("9: Reset daily consumption (not implemented yet)\n");
+        System.out.println("1: Daily Consumption Management Menu\n");
+        System.out.println("2: Food Data Management Menu\n");
+        System.out.println("0: Quit\n");
         System.out.printf("Daily Count - Fat: %sg | Carbs: %sg | Protein: %sg |%n\n", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
-        System.out.println("0: Quit");
-    }
 
-    public static void appLoop(String choice) {
+        String choice = scanner.nextLine();
+
         switch (choice) {
-            case "1" -> addFood();
-            case "2" -> listFood();
-            case "3" -> removeFood();
-            case "5" -> addToDailyConsumption();
-            case "6" -> resetConsumedFood();
+            case "1" -> consumedMenu();
+            case "2" -> dataManagementMenu();
             case "0" -> {
                 System.out.println("Exiting...");
                 System.exit(0);
             }
             default -> System.out.println("Invalid Option");
+        }
+    }
+
+    // Consumed Food Sub-Menu
+    private static void consumedMenu() {
+        while (true) {
+            Macros macros = new Macros();
+
+            System.out.println("\nConsumed Food Menu\n");
+            System.out.println("1: Add Consumed food\n");
+            System.out.println("2: List stored food (currently used to view foods that can be added)\n");
+            System.out.println("8: Reset daily macro tracker\n");
+            System.out.println("9: Return to main menu.\n");
+            System.out.println("0: Quit\n");
+            System.out.printf("Daily Count - Fat: %sg | Carbs: %sg | Protein: %sg |%n\n", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
+
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+            case "1" -> addToDailyConsumption();
+            case "2" -> listFood();
+            case "8" -> resetConsumedFood();
+            case "9" -> {
+                return;
+                }
+            case "0" -> {
+                System.out.println("Exiting...");
+                System.exit(0);
+                }
+            default -> System.out.println("Invalid Option");
+            }
+        }
+    }
+
+    // Data Management Sub-Menu
+    private static void dataManagementMenu() {
+        while (true) {
+            System.out.println("\nFood Data Management Menu\n");
+            System.out.println("1: Add Food\n");
+            System.out.println("2: Remove food\n");
+            System.out.println("3: List foods\n");
+            System.out.println("9: Return to main menu.\n");
+            System.out.println("0: Quit\n");
+
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+            case "1" -> addFood();
+            case "2" -> removeFood();
+            case "3" -> listFood();
+            case "9" -> {
+                return;
+                }
+            case "0" -> {
+                System.out.println("Exiting...");
+                System.exit(0);
+                }
+            default -> System.out.println("Invalid Option");
+            }
         }
     }
 
