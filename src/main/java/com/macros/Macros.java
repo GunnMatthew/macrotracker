@@ -20,7 +20,7 @@ public class Macros {
                 double servingSize = food.getServingSize();
                 String servingUnit = food.getServingUnit();
 
-                double convertAmount = unitConversions.convert(amount, unit, servingUnit);
+                double convertAmount = UnitConversions.convert(amount, unit, servingUnit);
 
                 double multiplier = convertAmount / servingSize;
 

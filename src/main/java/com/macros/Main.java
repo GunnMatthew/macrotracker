@@ -73,7 +73,7 @@ public class Main {
         while (true) {
             System.out.println("Enter the unit of measurement for serving size (G, Oz, lb, Cup, mL, L, tsp, tbsp, FlOz, unit): ");
             servingUnit = scanner.nextLine().toLowerCase();
-            if (unitConversions.isValidUnit(servingUnit)) {
+            if (UnitConversions.isValidUnit(servingUnit)) {
                 break;
             } else {
                 System.out.println("Invalid unit. Please enter a valid unit.");

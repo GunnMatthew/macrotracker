@@ -3,7 +3,7 @@ package com.macros;
 import java.util.HashSet;
 import java.util.Set;
 
-public class UnitConversions {
+public class unitConversions {
 
     // Unit Validation
     private static final Set<String> validUnits = new HashSet();
