@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class Main {
     private static DBManager dbManager;
     private static Scanner scanner = new Scanner(System.in);
-    private static ArrayList<Meal.TotalMeal> dailyMeals = new ArrayList<>();
+    public static ArrayList<Meal.TotalMeal> dailyMeals = new ArrayList<>();
 
     public static void main(String[] args) {
         try {

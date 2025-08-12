@@ -30,6 +30,16 @@
       <artifactId>sqlite-jdbc</artifactId>
       <version>3.45.2.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>21.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>21.0.2</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -52,6 +62,15 @@
         <configuration>
           <mainClass>com.macros.Main</mainClass>
         </configuration>
+      </plugin>
+      <!-- other plugins -->
+      <plugin>
+          <groupId>org.openjfx</groupId>
+          <artifactId>javafx-maven-plugin</artifactId>
+          <version>0.0.8</version>
+          <configuration>
+              <mainClass>com.macros.MacroTrackerApp</mainClass>
+          </configuration>
       </plugin>
     </plugins>
   </build>
