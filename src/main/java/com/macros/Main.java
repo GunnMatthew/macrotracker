@@ -66,7 +66,7 @@ public class Main {
             switch (choice) {
             case "1" -> addToDailyConsumption();
             case "2" -> listFood();
-            case "8" -> resetConsumedFood();
+            case "8" -> resetConsumedFood(dbManager);
             case "9" -> {
                 return;
                 }
@@ -271,7 +271,7 @@ public class Main {
     }
 
     //Method to handle exception for dbManager.resetConsumedFoods
-    private static void resetConsumedFood() {
+    public static void resetConsumedFood(DBManager dbManager) {
         try {
                 dbManager.resetConsumedFoods();
                 dailyMeals.clear();
