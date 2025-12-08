@@ -10,3 +10,7 @@ Things still in progress:
 - [ ] Database to store "common" meals.  Custom meals that the user frequently eats
 - [ ] Database for restaurant foods
 
+##Installation
+  1. Find the "MacroTracker_PreRelease" and download it.  The most current version can be found [here.](https://github.com/GunnMatthew/macrotracker/releases/tag/MacroTracker_PreRelease)
+  2. Extract the .Zip to it's desired location.
+  3. From within the newly extracted folder, run "macroTracker.bat" and the program will start.
