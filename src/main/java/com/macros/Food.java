@@ -1,13 +1,19 @@
 package com.macros;
 public class Food {
-    private String foodName;
-    private double servingSize;
-    private String servingUnit;
-    private double fat;
-    private double carbs;
-    private double protein;
+    private Integer id;
+    private final String foodName;
+    private final double servingSize;
+    private final String servingUnit;
+    private final double fat;
+    private final double carbs;
+    private final double protein;
 
     public Food(String foodName, double servingSize, String servingUnit, double fat, double carbs, double protein) {
+        this(null, foodName, servingSize, servingUnit, fat, carbs, protein);
+    }
+
+    public Food(Integer id, String foodName, double servingSize, String servingUnit, double fat, double carbs, double protein) {
+        this.id = id;
         this.foodName = foodName;
         this.servingSize = servingSize;
         this.servingUnit = servingUnit;
@@ -18,6 +24,10 @@ public class Food {
 
     public String getName() {
         return foodName;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public double getServingSize() {

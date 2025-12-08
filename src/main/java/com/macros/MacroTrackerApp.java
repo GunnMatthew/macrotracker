@@ -1,36 +1,35 @@
 package com.macros;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 public class MacroTrackerApp extends Application {
-    //Database initialization
     private DBManager dbManager;
 
     @Override
     public void start(Stage primaryStage) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+        
         try {
             dbManager = new DBManager("macrotracker.db");
+            dbManager.createTable();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        // Load foods first (needed to compute macros from stored consumed items)
         final ArrayList<Food> foods;
         try {
             foods = dbManager.getAllFoods();
@@ -39,17 +38,20 @@ public class MacroTrackerApp extends Application {
             return;
         }
 
+        // Check date, save history and reset only if date changed since last open.
         try {
-            Main.dailyMeals.clear();
-            ArrayList<Object[]> consumed = dbManager.getAllConsumedFoods();
-            
-            for (Object[] entry : consumed) {
+            LocalDate today = LocalDate.now();
+            LocalDate lastOpened = dbManager.getLastOpenedDate();
+
+            // Load consumed items from DB so we can compute accurate macros for history
+            ArrayList<Meal.TotalMeal> consumedMeals = new ArrayList<>();
+            ArrayList<Object[]> consumedRows = dbManager.getAllConsumedFoods();
+            for (Object[] entry : consumedRows) {
                 String foodName = (String) entry[0];
                 double amount = (Double) entry[1];
                 String unit = (String) entry[2];
 
                 Food food = null;
-
                 for (Food f : foods) {
                     if (f.getName().equalsIgnoreCase(foodName)) {
                         food = f;
@@ -60,180 +62,97 @@ public class MacroTrackerApp extends Application {
                 if (food != null) {
                     Meal.TotalMeal meal = new Meal.TotalMeal("Single Food: " + food.getName());
                     meal.addItem(food, amount, unit);
-                    Main.dailyMeals.add(meal);
+
+                    // avoid adding obvious duplicates
+                    boolean exists = false;
+                    for (Meal.TotalMeal existing : consumedMeals) {
+                        if (existing.getItems().size() == meal.getItems().size()) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) consumedMeals.add(meal);
                 }
             }
+
+            if (lastOpened != null && lastOpened.isBefore(today)) {
+                // Date changed: compute macros based on consumedRows and save to history
+                Macros yesterdayMacros = new Macros();
+                yesterdayMacros.mealTotals(consumedMeals);
+                dbManager.saveMacroHistory(lastOpened, yesterdayMacros.getTotalFat(), yesterdayMacros.getTotalCarbs(), yesterdayMacros.getTotalProtein());
+
+                // clear stored consumed items for the new day
+                dbManager.resetConsumedFoods();
+                Utility.dailyMeals.clear();
+            } else {
+                // No date change (or first run) - populate in-memory list from DB
+                Utility.dailyMeals.clear();
+                Utility.dailyMeals.addAll(consumedMeals);
+            }
+
+            // Update last opened date to today
+            dbManager.setLastOpenedDate(today);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        //Handles retrieving macro data
-        ArrayList<Meal.TotalMeal> dailyMeals = Main.dailyMeals;
+        // Handle retrieving macro data
+        ArrayList<Meal.TotalMeal> dailyMeals = Utility.dailyMeals;
         Macros macros = new Macros();
         macros.mealTotals(dailyMeals);
         String macroText = String.format("Fat: %.1fg | Carbs: %.1fg | Protein: %.1fg", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
 
-        //Labels
         Label title = new Label("Macro Tracker");
         Label macroLabel = new Label(macroText);
         Label staticDaily = new Label("Daily Macros:");
+        Label date = new Label(LocalDate.now().format(formatter));
 
-        //Buttons
         Button dailyConsumptionBtn = new Button("Consuption Mgmt.");
         Button foodDataBtn = new Button("Food Data Mgmt.");
         Button mealMgmtBtn = new Button("Meal Mgmt.");
         Button quitBtn = new Button("Quit");
 
-        //Spacer
         Region spacer = new Region();
         spacer.setMinHeight(10);
 
-        //Management buttons horizontally layed out
+        //Management buttons layout
         HBox buttonRow = new HBox(20, dailyConsumptionBtn, foodDataBtn, mealMgmtBtn);
         buttonRow.setAlignment(javafx.geometry.Pos.CENTER);
         buttonRow.setPadding(new Insets(10));
         buttonRow.setPadding(new Insets(10));
         
-        VBox layout = new VBox(20, title, buttonRow, quitBtn, spacer, staticDaily, macroLabel);
+        VBox layout = new VBox(20, title, buttonRow, quitBtn, spacer, date, staticDaily, macroLabel);
         layout.setPadding(new Insets(20));
         layout.setAlignment(javafx.geometry.Pos.CENTER);
 
-        Scene scene = new Scene(layout, 600, 300);
+        Scene scene = new Scene(layout, 800, 450);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Macro Tracker");
         primaryStage.show();
 
-        //Consumption Button Configuration
+        // Consumption Button Configuration (Consumption Management)
         dailyConsumptionBtn.setStyle("-fx-font-size: 12px;");
         dailyConsumptionBtn.setPrefWidth(150);
         dailyConsumptionBtn.setOnAction(e -> {
-            
-            ListView<String> foodListView = new ListView<>();
-
-            for (Food food : foods) {
-                foodListView.getItems().add(food.getName());
-            }
-
-            foodListView.setPrefHeight(120);
-
-            Label consumptionLabel = new Label("Consumption Management");
-            Label staticDailyCopy = new Label("Daily Macros:");
-            Label macroLabelCopy = new Label(macroLabel.getText());
-
-            Button backBtn = new Button("Back");
-            Button addFoodBtn = new Button("Add food");
-            Button resetMacrosBtn = new Button("Reset Macros");
-
-            HBox consumeBtnLayout = new HBox(20, addFoodBtn, resetMacrosBtn);
-            consumeBtnLayout.setAlignment(javafx.geometry.Pos.CENTER);
-            consumeBtnLayout.setPadding(new Insets(10));
-
-            VBox consumptionLayout = new VBox(20, consumptionLabel, foodListView, consumeBtnLayout, staticDailyCopy, macroLabelCopy, backBtn);
-            consumptionLayout.setAlignment(javafx.geometry.Pos.CENTER);
-            consumptionLayout.setPadding(new Insets(20));
-
-            //Disable addFoodBtn until a food item is selected
-            addFoodBtn.setDisable(true);
-            foodListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-                addFoodBtn.setDisable(newVal == null);
-            });
-
-            scene.setRoot(consumptionLayout);
-
-            //Add Food Button
-            addFoodBtn.setOnAction(ev -> {
-                String selectedFoodName = foodListView.getSelectionModel().getSelectedItem();
-
-                if (selectedFoodName != null) {
-                    Food selectedFood = foods.stream().filter(f -> f.getName().equals(selectedFoodName)).findFirst().orElse(null);
-
-                    if (selectedFood != null) {
-                        Dialog<Pair<String, String>> dialog = new Dialog<>();
-                        dialog.setTitle("Add Food");
-                        dialog.setHeaderText("Enter Amount and unit for: " + selectedFood.getName());
-
-                        ButtonType addButtonType = new ButtonType("Add", ButtonType.OK.getButtonData());
-                        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-                        GridPane grid = new GridPane();
-                        grid.setHgap(10);
-                        grid.setVgap(10);
-
-                        TextField amountField = new TextField("1");
-                        TextField unitField = new TextField(selectedFood.getServingUnit());
-
-                        grid.add(new Label("Amount:"), 0, 0);
-                        grid.add(amountField, 1, 0);
-                        grid.add(new Label("Unit:"), 0, 1);
-                        grid.add(unitField, 1, 1);
-
-                        dialog.getDialogPane().setContent(grid);
-                        dialog.setResultConverter(dialogButton -> {
-                            if (dialogButton == addButtonType) {
-                                return new Pair<>(amountField.getText(), unitField.getText());
-                            }
-                            return null;
-                        });
-
-                        dialog.showAndWait().ifPresent(result -> {
-                            try {
-                                double amount = Double.parseDouble(result.getKey());
-                                String unit = result.getValue();
-
-                                try {
-                                    dbManager.addConsumedFood(selectedFood.getName(), amount, unit);
-                                } catch (SQLException ex) {
-                                    ex.printStackTrace();
-                                }
-
-                                Meal.TotalMeal meal = new Meal.TotalMeal("Single Food: " + selectedFood.getName());
-                                meal.addItem(selectedFood, amount, unit);
-                                Main.dailyMeals.add(meal);
-
-                                macros.mealTotals(Main.dailyMeals);
-
-                                String updatedMacroText = String.format("Fat: %.1fg | Carbs: %.1fg | Protein: %.1fg", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
-
-                                macroLabel.setText(updatedMacroText);
-                                macroLabelCopy.setText(updatedMacroText);
-                            } catch (NumberFormatException ex) {
-                                ex.printStackTrace();
-                            }
-                        });
-                    }
-                }
-
-                System.out.println("Add Food button pressed.");
-            });
-
-            //Reset Macro Button
-            resetMacrosBtn.setOnAction( ev -> {
-                Main.resetConsumedFood(dbManager);
-                macros.mealTotals(Main.dailyMeals);
-
-                String updatedMacroText = String.format("Fat: %.1fg | Carbs: %.1fg | Protein: %.1fg", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
-                 macroLabel.setText(updatedMacroText);
-                macroLabelCopy.setText(updatedMacroText);
-            });
-
-            //Consumption Menu Back button
-            backBtn.setOnAction(ev -> {
-                macros.mealTotals(Main.dailyMeals);
-                String updatedMacroText = String.format("Fat: %.1fg | Carbs: %.1fg | Protein: %.1fg", macros.getTotalFat(), macros.getTotalCarbs(), macros.getTotalProtein());
-                macroLabel.setText(updatedMacroText);
-                scene.setRoot(layout);
-            });
-
-            System.out.println("Consumption Management Button Clicked");
+            VBox consumption = ConsumptionView.create(dbManager, foods, macros, scene, layout, macroLabel);
+            scene.setRoot(consumption);
         });
 
         //Food Button Configuration
-
         foodDataBtn.setStyle("-fx-font-size: 12px;");
         foodDataBtn.setPrefWidth(150);
         foodDataBtn.setOnAction(e -> {
-            //Currently a palceholder for actual button logic
-            System.out.println("Food Data Management Button Clicked");
+            VBox foodLayout = FoodDataView.create(dbManager, foods, macros, scene, layout, macroLabel);
+            scene.setRoot(foodLayout);
+        });
+
+        // Meal Management Button Configuration
+        mealMgmtBtn.setStyle("-fx-font-size: 12px;");
+        mealMgmtBtn.setPrefWidth(150);
+        mealMgmtBtn.setOnAction(e -> {
+            VBox mealLayout = MealManagementView.create(dbManager, foods, macros, scene, layout);
+            scene.setRoot(mealLayout);
         });
 
         quitBtn.setOnAction(e -> primaryStage.close());

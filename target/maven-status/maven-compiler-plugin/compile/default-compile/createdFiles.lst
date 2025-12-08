@@ -1,9 +1,12 @@
 com\macros\Meal$TotalMeal.class
+com\macros\ConsumptionView.class
 com\macros\Meal$MealItem.class
+com\macros\MealManagementView.class
 com\macros\UnitConversions.class
 com\macros\Food.class
+com\macros\Utility.class
 com\macros\Meal.class
 com\macros\Macros.class
+com\macros\FoodDataView.class
 com\macros\MacroTrackerApp.class
 com\macros\DBManager.class
-com\macros\Main.class

@@ -6,9 +6,9 @@ import java.util.List;
 public class Meal {
     
     public static class MealItem {
-        private Food food;
-        private double amount;
-        private String unit;
+        private final Food food;
+        private final double amount;
+        private final String unit;
 
         public MealItem(Food food, double amount, String unit) {
             this.food = food;
