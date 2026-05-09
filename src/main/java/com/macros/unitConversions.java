@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UnitConversions {
-    // Showing that you can change code, and push it
-    // to GitHub using Git!
 
     // Unit Validation
     private static final Set<String> validUnits = new HashSet();
