@@ -22,6 +22,7 @@ public class MacroTrackerApp extends Application {
     public void start(Stage primaryStage) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
         
+        // Initialize database manager and create necessary tables if they don't exist
         try {
             dbManager = new DBManager("macrotracker.db");
             dbManager.createTable();
@@ -126,6 +127,7 @@ public class MacroTrackerApp extends Application {
         layout.setPadding(new Insets(20));
         layout.setAlignment(javafx.geometry.Pos.CENTER);
 
+        // Create and display the main application scene
         Scene scene = new Scene(layout, 800, 450);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Macro Tracker");

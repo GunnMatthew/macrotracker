@@ -18,7 +18,6 @@ import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 
 public class ConsumptionView {
-
     public static VBox create(DBManager dbManager, ArrayList<Food> foods, Macros macros, Scene scene, VBox mainLayout, Label macroLabel) {
         // Left List (Avail foods)
         Label leftTitle = new Label("Food to Add");
