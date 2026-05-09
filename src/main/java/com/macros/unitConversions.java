@@ -5,8 +5,6 @@ import java.util.Set;
 
 public class UnitConversions {
 
-    // You can edit your code and remotely
-    // add it to your repository using Git!
     // Unit Validation
     private static final Set<String> validUnits = new HashSet();
 
