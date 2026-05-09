@@ -1,4 +1,3 @@
-TEST
 # MacroTracker
 
 ## General Overview
